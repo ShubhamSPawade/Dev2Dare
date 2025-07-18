@@ -1,18 +1,16 @@
 package com.shourya.dev2dare.controller;
 
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/student")
 public class StudentController {
-    @GetMapping("/events")
-    public ResponseEntity<?> getRegisteredEvents() {
-        return null;
-    }
-
-    @PostMapping("/events/{id}/register")
-    public ResponseEntity<?> registerForEvent(@PathVariable Long id) {
-        return null;
+    @PreAuthorize("hasAuthority('STUDENT')")
+    @PostMapping("/register-event")
+    public String registerEvent() {
+        return "Event registered! (Only students can access this endpoint)";
     }
 } 

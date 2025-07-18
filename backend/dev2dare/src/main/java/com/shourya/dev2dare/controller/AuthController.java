@@ -1,26 +1,30 @@
 package com.shourya.dev2dare.controller;
 
-import com.shourya.dev2dare.dto.StudentSignupRequest;
-import com.shourya.dev2dare.dto.CollegeSignupRequest;
-import com.shourya.dev2dare.dto.LoginRequest;
+import com.shourya.dev2dare.dto.*;
+import com.shourya.dev2dare.service.AuthService;
+import jakarta.validation.Valid;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/auth")
+@RequestMapping
 public class AuthController {
-    @PostMapping("/student/register")
-    public ResponseEntity<?> registerStudent(@RequestBody StudentSignupRequest request) {
-        return null;
+    @Autowired
+    private AuthService authService;
+
+    @PostMapping("/register/college")
+    public ResponseEntity<AuthResponse> registerCollege(@Valid @RequestBody CollegeRegisterRequest request) {
+        return ResponseEntity.ok(authService.registerCollege(request));
     }
 
-    @PostMapping("/college/register")
-    public ResponseEntity<?> registerCollege(@RequestBody CollegeSignupRequest request) {
-        return null;
+    @PostMapping("/register/student")
+    public ResponseEntity<AuthResponse> registerStudent(@Valid @RequestBody StudentRegisterRequest request) {
+        return ResponseEntity.ok(authService.registerStudent(request));
     }
 
     @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestBody LoginRequest request) {
-        return null;
+    public ResponseEntity<AuthResponse> login(@Valid @RequestBody LoginRequest request) {
+        return ResponseEntity.ok(authService.login(request));
     }
 } 
