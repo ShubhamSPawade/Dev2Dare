@@ -3,6 +3,7 @@ package com.shourya.dev2dare.model;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -11,6 +12,9 @@ import java.util.Set;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+@Table(indexes = {
+    @Index(name = "idx_student_email", columnList = "email")
+})
 public class Student {
 
     @Id
@@ -24,14 +28,20 @@ public class Student {
 
     private String password;
 
-    private String collegeName;
+    @ManyToOne
+    @JoinColumn(name = "college_id")
+    private College college;
 
     @Enumerated(EnumType.STRING)
     @Builder.Default
     private Role role = Role.STUDENT;
 
-    @ManyToMany
-    @JoinTable(name = "student_event_registration", joinColumns = @JoinColumn(name = "student_id"), inverseJoinColumns = @JoinColumn(name = "event_id"))
-    @Builder.Default
-    private Set<Event> registeredEvents = new HashSet<>();
+    @Column(updatable = false)
+    private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
+
+    @PrePersist
+    protected void onCreate() { createdAt = LocalDateTime.now(); }
+    @PreUpdate
+    protected void onUpdate() { updatedAt = LocalDateTime.now(); }
 }

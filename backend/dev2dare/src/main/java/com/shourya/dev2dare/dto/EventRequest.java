@@ -19,4 +19,7 @@ public class EventRequest {
 
     @NotBlank
     private String location;
+
+    @NotNull
+    private Integer capacity;
 }

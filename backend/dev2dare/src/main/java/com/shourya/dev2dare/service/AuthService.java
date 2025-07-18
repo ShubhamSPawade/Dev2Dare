@@ -43,11 +43,13 @@ public class AuthService {
         if (studentRepository.findByEmail(request.getEmail()).isPresent()) {
             throw new RuntimeException("Email already registered as a student");
         }
+        College college = collegeRepository.findByName(request.getCollegeName())
+                .orElseThrow(() -> new RuntimeException("College not found with name: " + request.getCollegeName()));
         Student student = Student.builder()
                 .name(request.getName())
                 .email(request.getEmail())
                 .password(passwordEncoder.encode(request.getPassword()))
-                .collegeName(request.getCollegeName())
+                .college(college)
                 .role(Role.STUDENT)
                 .build();
         studentRepository.save(student);
@@ -85,4 +87,10 @@ public class AuthService {
                 .orElseThrow(() -> new UsernameNotFoundException("College not found"));
     }
 
+    public Student getLoggedInStudent(HttpServletRequest request) {
+        String token = jwtUtil.extractJwtFromRequest(request);
+        String email = jwtUtil.extractEmail(token);
+        return studentRepository.findByEmail(email)
+                .orElseThrow(() -> new UsernameNotFoundException("Student not found"));
+    }
 }

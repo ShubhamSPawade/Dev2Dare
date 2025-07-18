@@ -14,4 +14,7 @@ public class EventResponse {
     private LocalDateTime eventDateTime;
     private String location;
     private String createdByEmail;
+    private String status;
+    private String registrationTimestamp; // ISO string, nullable, only for participation views
+    private Boolean waitlisted; // nullable, only for participation views
 }

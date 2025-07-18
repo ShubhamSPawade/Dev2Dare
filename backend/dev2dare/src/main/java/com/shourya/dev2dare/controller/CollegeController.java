@@ -51,4 +51,16 @@ public class CollegeController {
             HttpServletRequest httpReq) {
         return ResponseEntity.ok(eventService.listForCollege(httpReq));
     }
+
+    @PreAuthorize("hasRole('COLLEGE')")
+    @GetMapping("/{id}/registrations")
+    public ResponseEntity<List<String>> getRegisteredStudents(@PathVariable Long id) {
+        return ResponseEntity.ok(eventService.getRegisteredStudentsForEvent(id));
+    }
+
+    @PreAuthorize("hasRole('COLLEGE')")
+    @GetMapping("/{id}/waitlist")
+    public ResponseEntity<List<String>> getWaitlistedStudents(@PathVariable Long id) {
+        return ResponseEntity.ok(eventService.getWaitlistedStudentsForEvent(id));
+    }
 }
