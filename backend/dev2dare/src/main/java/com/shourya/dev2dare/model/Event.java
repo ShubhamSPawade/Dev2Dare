@@ -4,6 +4,9 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDateTime;
+import java.util.HashSet;
+import java.util.Set;
+
 
 @Entity
 @Data
@@ -30,4 +33,8 @@ public class Event {
     @ManyToOne(optional = false)
     @JoinColumn(name = "college_id")
     private College createdBy;
+
+    @ManyToMany(mappedBy = "registeredEvents")
+    @Builder.Default
+    private Set<Student> registeredStudents = new HashSet<>();
 }

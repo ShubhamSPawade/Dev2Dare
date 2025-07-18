@@ -25,4 +25,4 @@ public class College {
 
     @Enumerated(EnumType.STRING)
     private Role role = Role.COLLEGE;
-} 
+}

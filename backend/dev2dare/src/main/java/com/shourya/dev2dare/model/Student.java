@@ -1,8 +1,10 @@
 package com.shourya.dev2dare.model;
 
-import com.shourya.dev2dare.model.Role;
 import jakarta.persistence.*;
 import lombok.*;
+
+import java.util.HashSet;
+import java.util.Set;
 
 @Entity
 @Data
@@ -10,6 +12,7 @@ import lombok.*;
 @AllArgsConstructor
 @Builder
 public class Student {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -24,5 +27,11 @@ public class Student {
     private String collegeName;
 
     @Enumerated(EnumType.STRING)
+    @Builder.Default
     private Role role = Role.STUDENT;
-} 
+
+    @ManyToMany
+    @JoinTable(name = "student_event_registration", joinColumns = @JoinColumn(name = "student_id"), inverseJoinColumns = @JoinColumn(name = "event_id"))
+    @Builder.Default
+    private Set<Event> registeredEvents = new HashSet<>();
+}
