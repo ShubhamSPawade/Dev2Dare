@@ -4,7 +4,11 @@ import com.shourya.dev2dare.dto.*;
 import com.shourya.dev2dare.model.*;
 import com.shourya.dev2dare.repository.*;
 import com.shourya.dev2dare.security.JwtUtil;
+
+import jakarta.servlet.http.HttpServletRequest;
+
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -39,11 +43,13 @@ public class AuthService {
         if (studentRepository.findByEmail(request.getEmail()).isPresent()) {
             throw new RuntimeException("Email already registered as a student");
         }
+        College college = collegeRepository.findByName(request.getCollegeName())
+                .orElseThrow(() -> new RuntimeException("College not found with name: " + request.getCollegeName()));
         Student student = Student.builder()
                 .name(request.getName())
                 .email(request.getEmail())
                 .password(passwordEncoder.encode(request.getPassword()))
-                .collegeName(request.getCollegeName())
+                .college(college)
                 .role(Role.STUDENT)
                 .build();
         studentRepository.save(student);
@@ -73,4 +79,18 @@ public class AuthService {
             throw new RuntimeException("Invalid role");
         }
     }
-} 
+
+    public College getLoggedInCollege(HttpServletRequest request) {
+        String token = jwtUtil.extractJwtFromRequest(request);
+        String email = jwtUtil.extractEmail(token); // <-- use extractEmail, not extractUsername
+        return collegeRepository.findByEmail(email)
+                .orElseThrow(() -> new UsernameNotFoundException("College not found"));
+    }
+
+    public Student getLoggedInStudent(HttpServletRequest request) {
+        String token = jwtUtil.extractJwtFromRequest(request);
+        String email = jwtUtil.extractEmail(token);
+        return studentRepository.findByEmail(email)
+                .orElseThrow(() -> new UsernameNotFoundException("Student not found"));
+    }
+}

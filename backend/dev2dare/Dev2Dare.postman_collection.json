@@ -1,0 +1,156 @@
+{
+  "info": {
+    "name": "Dev2Dare API",
+    "_postman_id": "dev2dare-collection-001",
+    "description": "Postman collection for Dev2Dare backend API testing.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Register College",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"ABC College\",\n  \"email\": \"college@example.com\",\n  \"password\": \"pass123\",\n  \"description\": \"A top college\"\n}"
+        },
+        "url": { "raw": "{{baseUrl}}/register/college", "host": ["{{baseUrl}}"], "path": ["register", "college"] }
+      }
+    },
+    {
+      "name": "Register Student",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"John Doe\",\n  \"email\": \"student@example.com\",\n  \"password\": \"pass123\",\n  \"collegeName\": \"ABC College\"\n}"
+        },
+        "url": { "raw": "{{baseUrl}}/register/student", "host": ["{{baseUrl}}"], "path": ["register", "student"] }
+      }
+    },
+    {
+      "name": "Login (Student)",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"email\": \"student@example.com\",\n  \"password\": \"pass123\",\n  \"role\": \"STUDENT\"\n}"
+        },
+        "url": { "raw": "{{baseUrl}}/login", "host": ["{{baseUrl}}"], "path": ["login"] }
+      }
+    },
+    {
+      "name": "Login (College)",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"email\": \"college@example.com\",\n  \"password\": \"pass123\",\n  \"role\": \"COLLEGE\"\n}"
+        },
+        "url": { "raw": "{{baseUrl}}/login", "host": ["{{baseUrl}}"], "path": ["login"] }
+      }
+    },
+    {
+      "name": "Student - Register for Event",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Authorization", "value": "Bearer {{jwt}}" }],
+        "url": { "raw": "{{baseUrl}}/student/register-event?eventId=1", "host": ["{{baseUrl}}"], "path": ["student", "register-event"], "query": [{ "key": "eventId", "value": "1" }] }
+      }
+    },
+    {
+      "name": "Student - Cancel Registration",
+      "request": {
+        "method": "DELETE",
+        "header": [{ "key": "Authorization", "value": "Bearer {{jwt}}" }],
+        "url": { "raw": "{{baseUrl}}/student/cancel-registration?eventId=1", "host": ["{{baseUrl}}"], "path": ["student", "cancel-registration"], "query": [{ "key": "eventId", "value": "1" }] }
+      }
+    },
+    {
+      "name": "Student - List All Events",
+      "request": {
+        "method": "GET",
+        "header": [{ "key": "Authorization", "value": "Bearer {{jwt}}" }],
+        "url": { "raw": "{{baseUrl}}/student/events", "host": ["{{baseUrl}}"], "path": ["student", "events"] }
+      }
+    },
+    {
+      "name": "Student - List My Events",
+      "request": {
+        "method": "GET",
+        "header": [{ "key": "Authorization", "value": "Bearer {{jwt}}" }],
+        "url": { "raw": "{{baseUrl}}/student/my-events", "host": ["{{baseUrl}}"], "path": ["student", "my-events"] }
+      }
+    },
+    {
+      "name": "College - Create Event",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Authorization", "value": "Bearer {{jwt}}" },
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"title\": \"Tech Fest\",\n  \"description\": \"Annual tech event\",\n  \"eventDateTime\": \"2024-07-01T10:00:00\",\n  \"location\": \"Auditorium\",\n  \"capacity\": 100\n}"
+        },
+        "url": { "raw": "{{baseUrl}}/college/events", "host": ["{{baseUrl}}"], "path": ["college", "events"] }
+      }
+    },
+    {
+      "name": "College - Update Event",
+      "request": {
+        "method": "PUT",
+        "header": [
+          { "key": "Authorization", "value": "Bearer {{jwt}}" },
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"title\": \"Tech Fest Updated\",\n  \"description\": \"Updated desc\",\n  \"eventDateTime\": \"2024-07-01T10:00:00\",\n  \"location\": \"Main Hall\",\n  \"capacity\": 120\n}"
+        },
+        "url": { "raw": "{{baseUrl}}/college/events/1", "host": ["{{baseUrl}}"], "path": ["college", "events", "1"] }
+      }
+    },
+    {
+      "name": "College - Delete Event",
+      "request": {
+        "method": "DELETE",
+        "header": [{ "key": "Authorization", "value": "Bearer {{jwt}}" }],
+        "url": { "raw": "{{baseUrl}}/college/events/1", "host": ["{{baseUrl}}"], "path": ["college", "events", "1"] }
+      }
+    },
+    {
+      "name": "College - List My Events",
+      "request": {
+        "method": "GET",
+        "header": [{ "key": "Authorization", "value": "Bearer {{jwt}}" }],
+        "url": { "raw": "{{baseUrl}}/college/events", "host": ["{{baseUrl}}"], "path": ["college", "events"] }
+      }
+    },
+    {
+      "name": "College - List Registered Students",
+      "request": {
+        "method": "GET",
+        "header": [{ "key": "Authorization", "value": "Bearer {{jwt}}" }],
+        "url": { "raw": "{{baseUrl}}/college/events/1/registrations", "host": ["{{baseUrl}}"], "path": ["college", "events", "1", "registrations"] }
+      }
+    },
+    {
+      "name": "College - List Waitlisted Students",
+      "request": {
+        "method": "GET",
+        "header": [{ "key": "Authorization", "value": "Bearer {{jwt}}" }],
+        "url": { "raw": "{{baseUrl}}/college/events/1/waitlist", "host": ["{{baseUrl}}"], "path": ["college", "events", "1", "waitlist"] }
+      }
+    }
+  ],
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:8081" },
+    { "key": "jwt", "value": "" }
+  ]
+}

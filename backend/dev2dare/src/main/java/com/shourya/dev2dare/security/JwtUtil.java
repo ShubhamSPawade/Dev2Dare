@@ -2,6 +2,7 @@ package com.shourya.dev2dare.security;
 
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -12,6 +13,7 @@ import java.util.Map;
 
 @Component
 public class JwtUtil {
+
     @Value("${jwt.secret}")
     private String jwtSecret;
 
@@ -23,7 +25,8 @@ public class JwtUtil {
 
     public String generateToken(String email, String role) {
         Map<String, Object> claims = new HashMap<>();
-        claims.put("role", role);
+        claims.put("role", role); // e.g., COLLEGE (not prefixed here)
+
         return Jwts.builder()
                 .setClaims(claims)
                 .setSubject(email)
@@ -33,12 +36,20 @@ public class JwtUtil {
                 .compact();
     }
 
+    public String extractJwtFromRequest(HttpServletRequest request) {
+        String header = request.getHeader("Authorization");
+        if (header == null || !header.startsWith("Bearer ")) {
+            throw new RuntimeException("Missing or invalid Authorization header");
+        }
+        return header.substring(7);
+    }
+
     public String extractEmail(String token) {
         return extractAllClaims(token).getSubject();
     }
 
     public String extractRole(String token) {
-        return (String) extractAllClaims(token).get("role");
+        return extractAllClaims(token).get("role", String.class);
     }
 
     public boolean validateToken(String token) {
@@ -57,4 +68,4 @@ public class JwtUtil {
                 .parseClaimsJws(token)
                 .getBody();
     }
-} 
+}
