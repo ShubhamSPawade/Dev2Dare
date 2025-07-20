@@ -21,10 +21,13 @@ import org.springframework.web.filter.OncePerRequestFilter;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.Optional;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @Component
 public class JwtAuthFilter extends OncePerRequestFilter {
 
+    private static final Logger logger = LoggerFactory.getLogger(JwtAuthFilter.class);
     @Autowired
     private JwtUtil jwtUtil;
     @Autowired
@@ -36,6 +39,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
 
+        logger.debug("[JwtAuthFilter] Filtering request: {} {}", request.getMethod(), request.getRequestURI());
         String authHeader = request.getHeader("Authorization");
         String token = null;
         String email = null;
@@ -44,13 +48,16 @@ public class JwtAuthFilter extends OncePerRequestFilter {
             token = authHeader.substring(7);
             try {
                 email = jwtUtil.extractEmail(token);
+                logger.debug("[JwtAuthFilter] Extracted email from token: {}", email);
             } catch (JwtException e) {
+                logger.error("[JwtAuthFilter] Invalid JWT token: {}", e.getMessage());
                 // Token invalid
             }
         }
 
         if (email != null && SecurityContextHolder.getContext().getAuthentication() == null) {
             String role = jwtUtil.extractRole(token);
+            logger.debug("[JwtAuthFilter] Extracted role from token: {}", role);
 
             if (jwtUtil.validateToken(token)) {
                 SimpleGrantedAuthority authority = new SimpleGrantedAuthority("ROLE_" + role); // <-- important
@@ -59,9 +66,13 @@ public class JwtAuthFilter extends OncePerRequestFilter {
                         user, null, Collections.singleton(authority));
                 authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                 SecurityContextHolder.getContext().setAuthentication(authToken);
+                logger.info("[JwtAuthFilter] Authentication set for user: {} with role: {}", email, role);
+            } else {
+                logger.warn("[JwtAuthFilter] JWT token validation failed for user: {}", email);
             }
         }
 
         filterChain.doFilter(request, response);
+        logger.debug("[JwtAuthFilter] Filter chain continued for request: {} {}", request.getMethod(), request.getRequestURI());
     }
 }

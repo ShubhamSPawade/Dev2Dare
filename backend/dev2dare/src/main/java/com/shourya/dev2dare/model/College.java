@@ -4,6 +4,8 @@ import com.shourya.dev2dare.model.Role;
 import jakarta.persistence.*;
 import lombok.*;
 import java.time.LocalDateTime;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @Entity
 @Data
@@ -14,6 +16,8 @@ import java.time.LocalDateTime;
     @Index(name = "idx_college_email", columnList = "email")
 })
 public class College {
+    private static final Logger logger = LoggerFactory.getLogger(College.class);
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -35,7 +39,13 @@ public class College {
     private LocalDateTime updatedAt;
 
     @PrePersist
-    protected void onCreate() { createdAt = LocalDateTime.now(); }
+    protected void onCreate() {
+        createdAt = LocalDateTime.now();
+        logger.debug("[College] @PrePersist: College created at {}", createdAt);
+    }
     @PreUpdate
-    protected void onUpdate() { updatedAt = LocalDateTime.now(); }
+    protected void onUpdate() {
+        updatedAt = LocalDateTime.now();
+        logger.debug("[College] @PreUpdate: College updated at {}", updatedAt);
+    }
 }

@@ -12,6 +12,8 @@ import com.shourya.dev2dare.repository.StudentRepository;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -23,6 +25,7 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class EventService {
 
+    private static final Logger logger = LoggerFactory.getLogger(EventService.class);
     private final EventRepository eventRepository;
     private final StudentRepository studentRepository;
     private final StudentEventRegistrationRepository registrationRepository;
@@ -33,6 +36,7 @@ public class EventService {
      * Creates a new event and notifies all students via email.
      */
     public EventResponse create(EventRequest req, HttpServletRequest httpReq) {
+        logger.info("[EventService] Creating event: title='{}', by college from request.", req.getTitle());
         College college = authService.getLoggedInCollege(httpReq);
         Event e = Event.builder()
                 .title(req.getTitle())
@@ -43,13 +47,18 @@ public class EventService {
                 .createdBy(college)
                 .build();
         Event saved = eventRepository.save(e);
+        logger.info("[EventService] Event saved: id={}, title='{}'", saved.getId(), saved.getTitle());
 
         // Notify students
-        studentRepository.findAll().forEach(student -> emailService.sendEmail(
+        studentRepository.findAll().forEach(student -> {
+            emailService.sendEmail(
                 student.getEmail(),
                 "New Event: " + saved.getTitle(),
-                "Hi " + student.getName() + ",\nA new event was posted by " + college.getName() + "."));
+                "Hi " + student.getName() + ",\nA new event was posted by " + college.getName() + ".");
+            logger.debug("[EventService] Notified student: {}", student.getEmail());
+        });
 
+        logger.info("[EventService] Event creation complete for id={}", saved.getId());
         return toDto(saved);
     }
 
@@ -57,10 +66,15 @@ public class EventService {
      * Updates an existing event if the logged-in college is the creator.
      */
     public EventResponse update(Long id, EventRequest req, HttpServletRequest httpReq) {
+        logger.info("[EventService] Updating event: id={}", id);
         College college = authService.getLoggedInCollege(httpReq);
         Event e = eventRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Event not found"));
+                .orElseThrow(() -> {
+                    logger.error("[EventService] Event not found: id={}", id);
+                    return new EntityNotFoundException("Event not found");
+                });
         if (!e.getCreatedBy().getId().equals(college.getId())) {
+            logger.error("[EventService] Unauthorized update attempt by college id={}", college.getId());
             throw new SecurityException("Not authorized");
         }
         e.setTitle(req.getTitle());
@@ -69,6 +83,7 @@ public class EventService {
         e.setLocation(req.getLocation());
         e.setCapacity(req.getCapacity());
         Event updated = eventRepository.save(e);
+        logger.info("[EventService] Event updated: id={}", updated.getId());
         return toDto(updated);
     }
 
@@ -76,13 +91,19 @@ public class EventService {
      * Deletes an event if the logged-in college is the creator.
      */
     public void delete(Long id, HttpServletRequest httpReq) {
+        logger.info("[EventService] Deleting event: id={}", id);
         College college = authService.getLoggedInCollege(httpReq);
         Event e = eventRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Event not found"));
+                .orElseThrow(() -> {
+                    logger.error("[EventService] Event not found for delete: id={}", id);
+                    return new EntityNotFoundException("Event not found");
+                });
         if (!e.getCreatedBy().getId().equals(college.getId())) {
+            logger.error("[EventService] Unauthorized delete attempt by college id={}", college.getId());
             throw new SecurityException("Not authorized");
         }
         eventRepository.delete(e);
+        logger.info("[EventService] Event deleted: id={}", id);
     }
 
     /**
@@ -90,6 +111,7 @@ public class EventService {
      */
     public List<EventResponse> listForCollege(HttpServletRequest httpReq) {
         College college = authService.getLoggedInCollege(httpReq);
+        logger.info("[EventService] Listing events for college id={}", college.getId());
         return eventRepository.findByCreatedBy(college).stream()
                 .map(this::toDto)
                 .collect(Collectors.toList());
@@ -99,11 +121,19 @@ public class EventService {
      * Registers a student for an event. Throws if student or event not found.
      */
     public String registerStudentToEvent(Long studentId, Long eventId) {
+        logger.info("[EventService] Registering student id={} to event id={}", studentId, eventId);
         Student student = studentRepository.findById(studentId)
-                .orElseThrow(() -> new EntityNotFoundException("Student not found"));
+                .orElseThrow(() -> {
+                    logger.error("[EventService] Student not found: id={}", studentId);
+                    return new EntityNotFoundException("Student not found");
+                });
         Event event = eventRepository.findById(eventId)
-                .orElseThrow(() -> new EntityNotFoundException("Event not found"));
+                .orElseThrow(() -> {
+                    logger.error("[EventService] Event not found for registration: id={}", eventId);
+                    return new EntityNotFoundException("Event not found");
+                });
         if (registrationRepository.findByStudentAndEvent(student, event).isPresent()) {
+            logger.warn("[EventService] Student id={} already registered for event id={}", studentId, eventId);
             return "Student already registered for this event.";
         }
         long registeredCount = registrationRepository.findByEvent(event).stream().filter(r -> !r.isWaitlisted()).count();
@@ -115,8 +145,10 @@ public class EventService {
                 .build();
         registrationRepository.save(registration);
         if (waitlisted) {
+            logger.info("[EventService] Student id={} waitlisted for event id={}", studentId, eventId);
             return "Event is full. You have been added to the waitlist.";
         } else {
+            logger.info("[EventService] Student id={} successfully registered for event id={}", studentId, eventId);
             return "Registration successful!";
         }
     }

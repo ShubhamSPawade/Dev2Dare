@@ -6,6 +6,8 @@ import lombok.*;
 import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Set;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @Entity
 @Data
@@ -16,6 +18,8 @@ import java.util.Set;
     @Index(name = "idx_student_email", columnList = "email")
 })
 public class Student {
+
+    private static final Logger logger = LoggerFactory.getLogger(Student.class);
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -41,7 +45,13 @@ public class Student {
     private LocalDateTime updatedAt;
 
     @PrePersist
-    protected void onCreate() { createdAt = LocalDateTime.now(); }
+    protected void onCreate() {
+        createdAt = LocalDateTime.now();
+        logger.debug("[Student] @PrePersist: Student created at {}", createdAt);
+    }
     @PreUpdate
-    protected void onUpdate() { updatedAt = LocalDateTime.now(); }
+    protected void onUpdate() {
+        updatedAt = LocalDateTime.now();
+        logger.debug("[Student] @PreUpdate: Student updated at {}", updatedAt);
+    }
 }

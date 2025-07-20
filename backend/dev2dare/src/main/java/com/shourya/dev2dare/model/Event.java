@@ -6,6 +6,8 @@ import lombok.*;
 import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Set;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
 @Entity
@@ -19,6 +21,8 @@ import java.util.Set;
     @Index(name = "idx_event_status", columnList = "status")
 })
 public class Event {
+    private static final Logger logger = LoggerFactory.getLogger(Event.class);
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -47,9 +51,15 @@ public class Event {
     private EventStatus status = EventStatus.UPCOMING;
 
     @PrePersist
-    protected void onCreate() { createdAt = LocalDateTime.now(); }
+    protected void onCreate() {
+        createdAt = LocalDateTime.now();
+        logger.debug("[Event] @PrePersist: Event created at {}", createdAt);
+    }
     @PreUpdate
-    protected void onUpdate() { updatedAt = LocalDateTime.now(); }
+    protected void onUpdate() {
+        updatedAt = LocalDateTime.now();
+        logger.debug("[Event] @PreUpdate: Event updated at {}", updatedAt);
+    }
 
     @ManyToOne(optional = false)
     @JoinColumn(name = "college_id")

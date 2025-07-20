@@ -3,6 +3,8 @@ package com.shourya.dev2dare.model;
 import jakarta.persistence.*;
 import lombok.*;
 import java.time.LocalDateTime;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @Entity
 @Data
@@ -13,6 +15,8 @@ import java.time.LocalDateTime;
     @UniqueConstraint(columnNames = {"student_id", "event_id"})
 })
 public class StudentEventRegistration {
+    private static final Logger logger = LoggerFactory.getLogger(StudentEventRegistration.class);
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -31,5 +35,8 @@ public class StudentEventRegistration {
     private boolean waitlisted = false;
 
     @PrePersist
-    protected void onRegister() { registeredAt = LocalDateTime.now(); }
+    protected void onRegister() {
+        registeredAt = LocalDateTime.now();
+        logger.debug("[StudentEventRegistration] @PrePersist: Registration at {}", registeredAt);
+    }
 } 
